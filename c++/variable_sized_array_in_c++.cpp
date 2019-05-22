@@ -21,7 +21,7 @@ int main() {
         ((int **)a)[i] = k;
     }
 
-    for(int i = 0; i < n; i++) {
+    for(int i = 0; i < q; i++) {
         int x,y;
         scanf("%d %d", &x, &y);
         printf("%d\n", ((int **)a)[x][y+1]);
