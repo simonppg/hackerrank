@@ -332,6 +332,29 @@ void parse(Tag *tree, Queue *q) {
     //print_tree(tree);
 }
 
+Tag* find_tag2(Tag *tree, char *tag) {
+    Tag *t = NULL;
+    Tag* current = tree;
+    while (current)
+    {
+        if(strcmp(current->name, tag) == 0) {
+            t = current;
+            break;
+        }
+
+        if(current != NULL && current->child) {
+            current = current->child;
+        } else {
+            if(current->next) {
+                current = current->next;
+            } else {
+                current = current->parent->next;
+            }
+        }
+    }
+    return t;
+}
+
 Tag* find_tag(Tag *tree, char *tag) {
     Tag *current = tree;
     Tag *t = NULL;
@@ -373,8 +396,10 @@ bool has_child(Tag *tree, char *parent, char *child) {
 }
 
 Attr* get_attr(Tag *tree, char *name, char *key) {
-    Tag *tag = find_tag(tree, name);
+    Tag *tag = find_tag2(tree, name);
     if(!tag)
+        return NULL;
+    if(!tag->attr_queue)
         return NULL;
 
     Node *current = tag->attr_queue->front;
@@ -393,6 +418,7 @@ Attr* get_attr(Tag *tree, char *name, char *key) {
 void query(Tag *tree, Queue *q) {
     Node *current = (Node *) q->front;
     char *parent = ((Token *)q->front->data)->str;
+            char *child = NULL;
 
     //print_queue(q, print_token_debug);
     //printf("\n");
@@ -401,7 +427,6 @@ void query(Tag *tree, Queue *q) {
         if(((Token *)current->data)->type == STRING &&
                 current->next &&
                 ((Token *)current->next->data)->type == DOT) {
-            char *child;
             parent = ((Token *)current->data)->str;
             child = ((Token *)current->next->next->data)->str;
             if(has_child(tree, parent, child)) {
@@ -418,7 +443,16 @@ void query(Tag *tree, Queue *q) {
                 ((Token *)current->next->data)->type == TILDE) {
             Attr* attr;
             char *key = ((Token *)current->next->next->data)->str;
-            attr = get_attr(tree, parent, key);
+            if(child)
+                attr = get_attr(tree, child, key);
+            else
+            {
+                child = ((Token* )current->data)->str;
+                if(strcmp(child, tree->child->name) == 0) {
+                    attr = get_attr(tree, child, key);
+                }else
+                    attr = NULL;
+            }
             if(attr)
                 printf("%s\n", attr->value);
             else
