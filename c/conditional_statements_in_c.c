@@ -34,6 +34,8 @@ int main()
 	else
 		printf("Greater than 9");
 
+    free(n_str);
+
 	return 0;
 }
 
